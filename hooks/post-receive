@@ -1,0 +1,4 @@
+#!/usr/bin/python
+from django_git_deploy import post_receive 
+
+post_receive()
