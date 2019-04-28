@@ -3,7 +3,7 @@ import os
 import subprocess
 import shutil
 import time
-import json
+import yaml
 from contextlib import contextmanager
 
 root_map = { "devel"  : "/var/django/sleipner/devel/sleipner",
@@ -13,6 +13,9 @@ res_root = "/home/munin/res/sleipner/static"
 
 sleipner_mode = {"devel"  : "DEVEL" ,
                  "master" : "SLEIPNER"}
+
+
+
 
 @contextmanager
 def env_context(env):
@@ -46,9 +49,10 @@ def pushd(path):
 
 
 class Config(object):
+    config_file = "deploy_config.yml"
 
-    def __init__(self, config_file = "hooks/deploy_config.json"):
-        self.data = json.load(open(config_file))
+    def __init__(self, config_file = "hooks/{}".format(config_file)):
+        self.data = yaml.load(open(config_file))
 
         for branch,config in self.data.items():
             if not "path" in config:
@@ -132,3 +136,33 @@ def post_receive():
 def deploy(branch):
     conf = Config()
     update_wc(branch, conf)
+
+
+
+def make_hook():
+    if os.path.exists("post-receive.sample"):
+        print("Removing existing post-receive.sample file")
+    elif os.path.exists("post-receive"):
+        print("Updating existing post-receive file")
+    else:
+        raise OSError("The make_hook script must be invoked from the hooks/ directory in a git repo")
+
+    with open("post-receive", "w") as f:
+        f.write("""
+#!/usr/bin/python
+from django_git_deploy import post_receive
+
+post_receive()
+        """)
+
+    os.chmod("post-receive", 0o755)
+    if os.path.exists("post-receive.sample"):
+        os.unlink("post-receive.sample")
+
+
+    if not os.path.exists(Config.config_file):
+        d = {"master": {"path": "/path/to/deploy/master",
+                        "env": {"KEY1" : "VALUE1"}}}
+        with open(Config.config_file, "w") as f:
+            f.write(yaml.dump(d))
+        print("Sample configuration stored in: {}".format(Config.config_file))

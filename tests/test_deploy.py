@@ -1,24 +1,9 @@
-import json
+import yaml
 import os
-from contextlib import contextmanager
-import tempfile
-import shutil
-
 import unittest
 
 import django_git_deploy
-
-@contextmanager
-def tmpd():
-    cwd0 = os.getcwd()
-    tmpd = tempfile.mkdtemp()
-    os.chdir(tmpd)
-
-    yield tmpd
-
-    os.chdir(cwd0)
-    shutil.rmtree(tmpd)
-
+from .util import tmpd
 
 
 class DeployTest(unittest.TestCase):
@@ -32,33 +17,34 @@ class DeployTest(unittest.TestCase):
 
 
     def test_config(self):
+        config_file = "hooks/deploy_config.yml"
         with tmpd() as wd:
             os.makedirs("repo.git/hooks")
             with django_git_deploy.pushd("repo.git"):
                 d = {"branch" : {}}
-                with open("hooks/deploy_config.json", "w") as f:
-                    f.write(json.dumps(d))
+                with open(config_file, "w") as f:
+                    f.write(yaml.dump(d))
                 with self.assertRaises(OSError):
                     c = django_git_deploy.Config()
 
                 d = {"branch" : {"path" : "/does/not/exist"}}
-                with open("hooks/deploy_config.json", "w") as f:
-                    f.write(json.dumps(d))
+                with open(config_file, "w") as f:
+                    f.write(yaml.dump(d))
                 with self.assertRaises(OSError):
                     c = django_git_deploy.Config()
 
 
                 os.makedirs("path/.git")
                 d = {"branch" : {"path" : "path"}}
-                with open("hooks/deploy_config.json", "w") as f:
-                    f.write(json.dumps(d))
+                with open(config_file, "w") as f:
+                    f.write(yaml.dump(d))
                 with self.assertRaises(OSError):
                     c = django_git_deploy.Config()
 
                 os.makedirs("path2")
                 d = {"branch" : {"path" : "path2"}}
-                with open("hooks/deploy_config.json", "w") as f:
-                    f.write(json.dumps(d))
+                with open(config_file, "w") as f:
+                    f.write(yaml.dump(d))
                 c = django_git_deploy.Config()
 
                 self.assertEqual( c.path("branch"), "path2")
@@ -68,9 +54,9 @@ class DeployTest(unittest.TestCase):
                 self.assertEqual(len(c.env("branch")), 0)
 
                 d = {"branch" : {"path" : "path2", "env" : {"KEY" : "VALUE"}}}
-                with open("hooks/deploy_config2.json", "w") as f:
-                    f.write(json.dumps(d))
-                c = django_git_deploy.Config( config_file = "hooks/deploy_config2.json")
+                with open("hooks/deploy_config2.yml", "w") as f:
+                    f.write(yaml.dump(d))
+                c = django_git_deploy.Config( config_file = "hooks/deploy_config2.yml")
                 env = c.env("branch")
                 self.assertIn("KEY", env)
                 self.assertEqual(env["KEY"], "VALUE")
