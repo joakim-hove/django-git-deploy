@@ -41,7 +41,7 @@ class Config(object):
     config_file = "deploy_config.yml"
 
     def __init__(self, config_file = "hooks/{}".format(config_file)):
-        self.data = yaml.load(open(config_file))
+        self.data = yaml.safe_load(open(config_file))
 
         for branch,config in self.data.items():
             if not "path" in config:
