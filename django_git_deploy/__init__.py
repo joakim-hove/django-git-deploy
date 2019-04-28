@@ -148,8 +148,7 @@ def make_hook():
         raise OSError("The make_hook script must be invoked from the hooks/ directory in a git repo")
 
     with open("post-receive", "w") as f:
-        f.write("""
-#!/usr/bin/python
+        f.write("""#!/usr/bin/env python
 from django_git_deploy import post_receive
 
 post_receive()
