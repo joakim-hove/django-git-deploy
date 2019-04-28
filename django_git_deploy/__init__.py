@@ -6,17 +6,6 @@ import time
 import yaml
 from contextlib import contextmanager
 
-root_map = { "devel"  : "/var/django/sleipner/devel/sleipner",
-             "master" : "/var/django/sleipner/master/sleipner" }
-
-res_root = "/home/munin/res/sleipner/static"
-
-sleipner_mode = {"devel"  : "DEVEL" ,
-                 "master" : "SLEIPNER"}
-
-
-
-
 @contextmanager
 def env_context(env):
     env0 = os.environ.copy()
@@ -110,19 +99,6 @@ def update_wc(branch, conf):
                 subprocess.call( cmd ,
                                  stdout = open(os.devnull , "w") ,
                                  stderr = open(os.devnull , "w") )
-
-            # static_target = os.path.join( res_root , branch )
-            # if os.path.isdir(static_target):
-                # shutil.rmtree( static_target )
-
-            # os.makedirs( static_target )
-            # for entry in os.listdir( static_source ):
-                # src = os.path.join( static_source , entry )
-                # target = os.path.join( static_target , entry )
-                # if os.path.isfile( entry ):
-                    # shutil.copyfile( src , target )
-                # else:
-                    # shutil.copytree( src , target )
 
 
 def post_receive():
