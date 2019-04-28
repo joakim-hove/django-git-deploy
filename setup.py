@@ -28,7 +28,7 @@ setup(
         'Programming Language :: Python :: 3.7',
     ],
     description="Small package to create git hook for django deploy",
-    scripts=["bin/deploy"],
+    scripts=["bin/deploy", "bin/make_hook"],
     install_requires=requirements,
     license="GNU General Public License v3",
     include_package_data=True,

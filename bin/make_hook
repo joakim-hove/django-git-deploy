@@ -1,0 +1,4 @@
+#!/usr/bin/python
+from django_git_deploy import make_hook 
+
+make_hook()
