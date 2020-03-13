@@ -49,6 +49,8 @@ class Config(object):
 
             path = config["path"]
             if not os.path.isdir(path):
+                print("path: {} does not exist".format(path))
+                print("path: {} does not exist")
                 raise OSError("The path setting must point to an existing directory")
 
             if os.path.isdir(os.path.join(path, ".git")):
