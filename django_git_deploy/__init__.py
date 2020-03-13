@@ -95,7 +95,7 @@ def update_wc(branch, conf):
                 os.mkdir( static_source )
 
             for cmd in cmd_list:
-                print "[{}/{}]: {}".format(path, conf.repo, " ".join(cmd))
+                print("[{}/{}]: {}".format(path, conf.repo, " ".join(cmd)))
                 subprocess.call( cmd ,
                                  stdout = open(os.devnull , "w") ,
                                  stderr = open(os.devnull , "w") )
