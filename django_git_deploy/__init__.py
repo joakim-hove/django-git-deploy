@@ -73,6 +73,10 @@ class Config(object):
 
 
 
+def reload_apache():
+    subprocess.call( ["sudo", "systemctl", "reload", "apache2"])
+
+
 def update_wc(branch, conf):
     if not branch in conf:
         return
@@ -109,11 +113,13 @@ def post_receive():
         (old , new , ref) = line.split()
         branch = ref.split("/")[-1]
         update_wc(branch, conf)
+    reload_apache()
 
 
 def deploy(branch):
     conf = Config()
     update_wc(branch, conf)
+    reload_apache()
 
 
 
