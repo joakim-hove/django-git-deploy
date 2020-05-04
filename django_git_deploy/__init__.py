@@ -91,11 +91,11 @@ def update_wc(branch, conf):
                 subprocess.call(["git", "clone", "--recursive" , "{}/{}".format(conf.repo_path, conf.repo)])
             os.chdir(conf.repo)
 
-            cmd_list = (["git" , "fetch" , "origin"],
-                        ["git" , "reset" , "--hard","origin/%s" % branch])
+            cmd_list = [["git" , "fetch" , "origin"],
+                        ["git" , "reset" , "--hard","origin/%s" % branch]]
 
             if os.path.isfile("restart") and os.access("restart", os.X_OK):
-                cmd_list.append(os.path.abspath("restart"))
+                cmd_list.append([os.path.abspath("restart")])
 
             static_source = os.path.join( path , "staticfiles" )
             if not os.path.isdir( static_source ):
