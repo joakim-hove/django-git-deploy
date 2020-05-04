@@ -95,6 +95,8 @@ def update_wc(branch, conf):
                         ["git" , "reset" , "--hard","origin/%s" % branch],
                         ["python", "manage.py", "collectstatic", "--noinput"])
 
+            if os.path.isfile("restart") and os.access("restart", os.X_OK):
+                cmd_list.append(os.path.abspath(restart))
 
             static_source = os.path.join( path , "staticfiles" )
             if not os.path.isdir( static_source ):
