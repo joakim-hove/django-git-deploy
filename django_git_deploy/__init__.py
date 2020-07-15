@@ -61,7 +61,7 @@ class Config(object):
         self.repo_path = os.path.dirname( os.getcwd() )
 
 
-    def branch_config(self, git_branch):
+    def config_branch(self, git_branch):
         for config_branch in self.data.keys():
             if fnmatch.fnmatch(git_branch, config_branch):
                 return config_branch
