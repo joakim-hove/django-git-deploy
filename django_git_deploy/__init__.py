@@ -50,7 +50,6 @@ class Config(object):
             path = config["path"]
             if not os.path.isdir(path):
                 print("path: {} does not exist".format(path))
-                print("path: {} does not exist")
                 raise OSError("The path setting must point to an existing directory")
 
             if os.path.isdir(os.path.join(path, ".git")):
@@ -60,16 +59,20 @@ class Config(object):
         self.repo_path = os.path.dirname( os.getcwd() )
 
 
-    def __contains__(self, branch):
-        return branch in self.data
+    def branch_config(self, git_branch):
+        for config_branch in self.data.keys():
+            if fnmatch.fnmatch(git_branch, config_branch):
+                return config_branch
+
+        return None
 
 
-    def path(self, branch):
-        return self.data[branch]["path"]
+    def path(self, config_branch):
+        return self.data[config_branch]["path"]
 
 
-    def env(self, branch):
-        return self.data[branch].get("env", {})
+    def env(self, config_branch):
+        return self.data[config_branch].get("env", {})
 
 
 
@@ -77,13 +80,14 @@ def reload_apache():
     subprocess.call( ["sudo", "systemctl", "reload", "apache2"])
 
 
-def update_wc(branch, conf):
-    if not branch in conf:
+def update_wc(git_branch, conf):
+    config_branch = conf.config_branch(git_branch)
+    if config_branch is None:
         return
 
-    path = conf.path(branch)
+    path = conf.path(config_branch)
     env = {"GIT_DIR" : None, "GIT_WORK_TREE": None}
-    env.update(conf.env(branch))
+    env.update(conf.env(config_branch))
 
     with env_context(env):
         with pushd(path):
@@ -92,7 +96,7 @@ def update_wc(branch, conf):
             os.chdir(conf.repo)
 
             cmd_list = [["git" , "fetch" , "origin"],
-                        ["git" , "reset" , "--hard","origin/%s" % branch]]
+                        ["git" , "reset" , "--hard","origin/%s" % git_branch]]
 
             if os.path.isfile("restart") and os.access("restart", os.X_OK):
                 cmd_list.append([os.path.abspath("restart")])
@@ -112,8 +116,8 @@ def post_receive():
     conf = Config()
     for line in sys.stdin.readlines():
         (old , new , ref) = line.split()
-        branch = ref.split("/")[-1]
-        update_wc(branch, conf)
+        git_branch = ref.split("/")[-1]
+        update_wc(git_branch, conf)
     reload_apache()
 
 
