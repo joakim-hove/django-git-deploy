@@ -1,5 +1,6 @@
 import sys
 import os
+import os.path
 import subprocess
 import shutil
 import time
@@ -28,7 +29,8 @@ def env_context(env):
 @contextmanager
 def pushd(path):
     cwd0 = os.getcwd()
-    os.chdir(path)
+    if path:
+        os.chdir(path)
 
     yield
 
@@ -43,7 +45,7 @@ class Config(object):
     def __init__(self, config_file = "hooks/{}".format(config_file)):
         self.data = yaml.safe_load(open(config_file))
 
-        for branch,config in self.data.items():
+        for config_branch,config in self.data.items():
             if not "path" in config:
                 raise OSError("Must have a path setting in the branch payload")
 
@@ -70,6 +72,8 @@ class Config(object):
     def path(self, config_branch):
         return self.data[config_branch]["path"]
 
+    def script(self, config_branch):
+        return self.data[config_branch].get("script")
 
     def env(self, config_branch):
         return self.data[config_branch].get("env", {})
@@ -98,9 +102,6 @@ def update_wc(git_branch, conf):
             cmd_list = [["git" , "fetch" , "origin"],
                         ["git" , "reset" , "--hard","origin/%s" % git_branch]]
 
-            if os.path.isfile("restart") and os.access("restart", os.X_OK):
-                cmd_list.append([os.path.abspath("restart")])
-
             static_source = os.path.join( path , "staticfiles" )
             if not os.path.isdir( static_source ):
                 os.mkdir( static_source )
@@ -110,6 +111,16 @@ def update_wc(git_branch, conf):
                 subprocess.call( cmd ,
                                  stdout = open(os.devnull , "w") ,
                                  stderr = open(os.devnull , "w") )
+
+            script = conf.script(config_branch)
+            if os.path.isfile(script) and os.access(script, os.X_OK):
+                path, f = os.path.split(script)
+                with pushd(path):
+                    subprocess.call([f])
+            else:
+                print("script path: {} does not exist".format(script))
+                raise OSError("Script does not exist")
+
 
 
 def post_receive():
