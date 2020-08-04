@@ -151,7 +151,7 @@ def make_hook():
             os.unlink("post-receive.sample")
 
     with open("post-receive", "w") as f:
-        f.write("""#!/usr/bin/env python
+        f.write("""#!/usr/bin/env python3
 from django_git_deploy import post_receive
 
 post_receive()
