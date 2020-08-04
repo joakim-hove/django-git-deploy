@@ -114,13 +114,14 @@ def update_wc(git_branch, conf):
                                  stderr = open(os.devnull , "w") )
 
             script = conf.script(config_branch)
-            if os.path.isfile(script) and os.access(script, os.X_OK):
-                path, f = os.path.split(script)
-                with pushd(path):
-                    subprocess.call([os.path.abspath(f)])
-            else:
-                print("script path: {} does not exist".format(script))
-                raise OSError("Script does not exist")
+            if script:
+                if os.path.isfile(script) and os.access(script, os.X_OK):
+                    path, f = os.path.split(script)
+                    with pushd(path):
+                        subprocess.call([os.path.abspath(f)])
+                else:
+                    print("script path: {} does not exist".format(script))
+                    raise OSError("Script does not exist")
 
 
 
