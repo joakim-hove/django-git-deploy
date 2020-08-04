@@ -141,12 +141,14 @@ def deploy(branch):
 
 
 def make_hook():
+    _, hook_path = os.path.split(os.path.abspath(os.getcwd()))
+    if hook_path != "hooks":
+        raise OSError("The make_hook script must be invoked from the hooks/ directory in a git repo")
+
     if os.path.exists("post-receive.sample"):
         print("Removing existing post-receive.sample file")
-    elif os.path.exists("post-receive"):
-        print("Updating existing post-receive file")
-    else:
-        raise OSError("The make_hook script must be invoked from the hooks/ directory in a git repo")
+        if os.path.exists("post-receive.sample"):
+            os.unlink("post-receive.sample")
 
     with open("post-receive", "w") as f:
         f.write("""#!/usr/bin/env python
@@ -156,8 +158,6 @@ post_receive()
         """)
 
     os.chmod("post-receive", 0o755)
-    if os.path.exists("post-receive.sample"):
-        os.unlink("post-receive.sample")
 
 
     if not os.path.exists(Config.config_file):
