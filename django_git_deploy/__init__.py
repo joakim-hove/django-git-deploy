@@ -128,7 +128,7 @@ def update_wc(git_branch, conf):
 def post_receive():
     conf = Config()
     for line in sys.stdin.readlines():
-        (old , new , ref) = line.split()
+        (_, _, ref) = line.split()
         git_branch = ref.split("/")[-1]
         update_wc(git_branch, conf)
     reload_apache()

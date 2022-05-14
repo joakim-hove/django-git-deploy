@@ -26,6 +26,8 @@ setup(
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
     ],
     description="Small package to create git hook for django deploy",
     scripts=["bin/deploy", "bin/make_hook"],
@@ -39,6 +41,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/joakim-hove/django_git_deploy',
-    version='0.1.13',
+    version='0.1.14',
     zip_safe=False,
 )
