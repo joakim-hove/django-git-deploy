@@ -41,6 +41,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/joakim-hove/django_git_deploy',
-    version='0.1.14',
+    version='0.1.15',
     zip_safe=False,
 )

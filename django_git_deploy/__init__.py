@@ -103,7 +103,7 @@ def update_wc(git_branch, conf):
             cmd_list = [["git" , "fetch" , "origin"],
                         ["git" , "reset" , "--hard","origin/%s" % git_branch]]
 
-            static_source = os.path.join( path , "staticfiles" )
+            static_source = os.path.join( path , conf.repo, "staticfiles" )
             if not os.path.isdir( static_source ):
                 os.mkdir( static_source )
 
