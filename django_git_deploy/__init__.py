@@ -1,10 +1,8 @@
-from re import sub
+from pathlib import Path
 import sys
 import os
 import os.path
 import subprocess
-import shutil
-import time
 import yaml
 import fnmatch
 from contextlib import contextmanager
@@ -46,16 +44,16 @@ class Config(object):
     def __init__(self, config_file="hooks/{}".format(config_file)):
         self.data = yaml.safe_load(open(config_file))
 
-        for config_branch, config in self.data.items():
-            if not "path" in config:
+        for config in self.data.values():
+            if "path" not in config:
                 raise OSError("Must have a path setting in the branch payload")
 
-            path = config["path"]
-            if not os.path.isdir(path):
-                print("path: {} does not exist".format(path))
+            deploy_path = config["deploy_path"]
+            if not os.path.isdir(deploy_path):
+                print("path: {} does not exist".format(deploy_path))
                 raise OSError("The path setting must point to an existing directory")
 
-            if os.path.isdir(os.path.join(path, ".git")):
+            if os.path.isdir(os.path.join(deploy_path, ".git")):
                 raise OSError("Target path should not be the git repository")
 
         self.repo, _ = os.path.splitext(os.path.basename(os.getcwd()))
@@ -68,11 +66,15 @@ class Config(object):
 
         return None
 
-    def path(self, config_branch):
-        return self.data[config_branch]["path"]
+    def deploy_path(self, config_branch):
+        return Path(self.data[config_branch]["deploy_path"])
 
     def script(self, config_branch):
-        return self.data[config_branch].get("script")
+        script_arg = self.data[config_branch].get("script")
+        if script_arg is None:
+            return None
+
+        return Path(script_arg)
 
     def env(self, config_branch):
         return self.data[config_branch].get("env", {})
@@ -84,12 +86,12 @@ def reload_apache():
     # subprocess.call(["sudo", "systemctl", "reload", "apache2"])
 
 
-def update_wc(git_branch, conf):
+def update_work_tree(git_branch, conf):
     config_branch = conf.config_branch(git_branch)
     if config_branch is None:
         return
 
-    path = conf.path(config_branch)
+    deploy_path = conf.deploy_path(config_branch)
     env = {"GIT_DIR": None, "GIT_WORK_TREE": None}
     env.update(conf.env(config_branch))
 
@@ -99,46 +101,23 @@ def update_wc(git_branch, conf):
             "checkout",
             "-f",
             "--work-tree",
-            path,
+            str(deploy_path),
             "-C",
             f"{conf.repo_path}/{conf.repo}",
             git_branch,
         ]
-        print(cmd)
-        subprocess.call(cmd)
-        with pushd(path):
-            # if not os.path.isdir(conf.repo):
-            #    subprocess.call(
-            #        [
-            #            "git",
-            #            "clone",
-            #            "--recursive",
-            #            "{}/{}".format(conf.repo_path, conf.repo),
-            #        ]
-            #    )
+        subprocess.run(cmd, check=True)
+        with pushd(deploy_path):
             os.chdir(conf.repo)
 
-            # cmd_list = [
-            #     ["git", "fetch", "origin"],
-            #     ["git", "reset", "--hard", "origin/%s" % git_branch],
-            # ]
-
-            static_source = os.path.join(path, conf.repo, "staticfiles")
+            static_source = os.path.join(deploy_path, conf.repo, "staticfiles")
             if not os.path.isdir(static_source):
                 os.mkdir(static_source)
 
-                # for cmd in cmd_list:
-                #    print("[{}/{}]: {}".format(path, conf.repo, " ".join(cmd)))
-                #    subprocess.call(
-                #        cmd, stdout=open(os.devnull, "w"), stderr=open(os.devnull, "w")
-                #    )
-
             script = conf.script(config_branch)
             if script:
-                if os.path.isfile(script) and os.access(script, os.X_OK):
-                    path, f = os.path.split(script)
-                    with pushd(path):
-                        subprocess.call([os.path.abspath(f)])
+                if script.is_file() and os.access(script, os.X_OK):
+                    subprocess.run([str(script)], check=True)
                 else:
                     print("script path: {} does not exist".format(script))
                     raise OSError("Script does not exist")
@@ -149,11 +128,9 @@ def post_receive():
     for line in sys.stdin.readlines():
         (_, _, ref) = line.split()
         git_branch = ref.split("/")[-1]
-        update_wc(git_branch, conf)
-    reload_apache()
+        update_work_tree(git_branch, conf)
 
 
 def deploy(branch):
     conf = Config()
-    update_wc(branch, conf)
-    reload_apache()
+    update_work_tree(branch, conf)

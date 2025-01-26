@@ -5,6 +5,13 @@ build-backend = "hatchling.build"
 [project]
 dynamic= ["version"]
 name = "django-git-deploy"
+
+
+# The project has a real dependency on the yaml package; 
+# however the django-git-deploy package will (typically) be installed
+# system-wide - and at least on Ubuntu 24.04 the operating system already
+# has a debian package with pyaml installed - which conflicts with the one
+# specified here.
 dependencies = [
   #  "pyaml"
 ]
