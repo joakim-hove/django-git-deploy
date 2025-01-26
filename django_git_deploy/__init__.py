@@ -98,12 +98,12 @@ def update_work_tree(git_branch, conf):
     with env_context(env):
         cmd = [
             "git",
-            "checkout",
-            "-f",
             "--work-tree",
             str(deploy_path),
             "-C",
-            f"{conf.repo_path}/{conf.repo}",
+            f"{conf.repo_path}/{conf.repo}.git",
+            "checkout",
+            "-f",
             git_branch,
         ]
         print(" ".join(cmd))
