@@ -78,7 +78,8 @@ class Config(object):
 
 
 def reload_apache():
-    subprocess.call(["sudo", "systemctl", "reload", "apache2"])
+    print("Running reload apache")
+    # subprocess.call(["sudo", "systemctl", "reload", "apache2"])
 
 
 def update_wc(git_branch, conf):
