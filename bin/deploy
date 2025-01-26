@@ -1,6 +1,0 @@
-#!/usr/bin/env python
-from django_git_deploy import deploy
-import sys
-
-
-deploy(sys.argv[1])
