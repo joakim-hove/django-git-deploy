@@ -77,6 +77,7 @@ class Config(object):
         return self.data[config_branch].get("env", {})
 
 
+# Comment
 def reload_apache():
     print("Running reload apache")
     # subprocess.call(["sudo", "systemctl", "reload", "apache2"])
