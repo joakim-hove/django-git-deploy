@@ -56,8 +56,8 @@ class Config(object):
             if os.path.isdir(os.path.join(deploy_path, ".git")):
                 raise OSError("Target path should not be the git repository")
 
-        self.repo, _ = os.path.splitext(os.path.basename(os.getcwd()))
-        self.repo_path = os.path.dirname(os.getcwd())
+        self.repo_name, _ = os.path.splitext(os.path.basename(os.getcwd()))
+        self.repo_path = os.getcwd()
 
     def config_branch(self, git_branch):
         for config_branch in self.data.keys():
@@ -99,9 +99,9 @@ def update_work_tree(git_branch, conf):
         cmd = [
             "git",
             "--work-tree",
-            str(deploy_path),
+            f"{deploy_path / conf.repo_name}",
             "-C",
-            f"{conf.repo_path}/{conf.repo}.git",
+            f"{conf.repo_path}",
             "checkout",
             "-f",
             git_branch,
@@ -109,11 +109,7 @@ def update_work_tree(git_branch, conf):
         print(" ".join(cmd))
         subprocess.run(cmd, check=True)
         with pushd(deploy_path):
-            os.chdir(conf.repo)
-
-            static_source = os.path.join(deploy_path, conf.repo, "staticfiles")
-            if not os.path.isdir(static_source):
-                os.mkdir(static_source)
+            os.chdir(conf.repo_name)
 
             script = conf.script(config_branch)
             if script:
