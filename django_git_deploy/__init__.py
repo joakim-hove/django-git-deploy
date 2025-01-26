@@ -45,7 +45,7 @@ class Config(object):
         self.data = yaml.safe_load(open(config_file))
 
         for config in self.data.values():
-            if "path" not in config:
+            if "deploy_path" not in config:
                 raise OSError("Must have a path setting in the branch payload")
 
             deploy_path = config["deploy_path"]
