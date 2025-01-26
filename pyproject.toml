@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 dynamic= ["version"]
 name = "django-git-deploy"
 dependencies = [
-  "pyaml"
+  #  "pyaml"
 ]
 
 [tool.hatch.version]
