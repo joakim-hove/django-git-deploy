@@ -106,6 +106,7 @@ def update_work_tree(git_branch, conf):
             f"{conf.repo_path}/{conf.repo}",
             git_branch,
         ]
+        print(" ".join(cmd))
         subprocess.run(cmd, check=True)
         with pushd(deploy_path):
             os.chdir(conf.repo)
