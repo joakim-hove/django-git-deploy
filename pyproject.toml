@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+dynamic= ["version"]
+name = "django-git-deploy"
+dependencies = [
+  "pyaml"
+]
+
+[tool.hatch.version]
+path = "django_git_deploy/version.py"
+
+[tool.uv]
+dev-dependencies = [
+  "build"
+]
+
+[project.scripts]
+make_hook = "django_git_deploy.entry_points:make_hook"
