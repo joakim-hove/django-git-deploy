@@ -91,32 +91,44 @@ def update_wc(git_branch, conf):
     env.update(conf.env(config_branch))
 
     with env_context(env):
+        subprocess.call(
+            [
+                "git",
+                "checkout",
+                "-f",
+                "--work-tree",
+                path,
+                "-C",
+                conf.repo_path,
+                git_branch,
+            ]
+        )
         with pushd(path):
-            if not os.path.isdir(conf.repo):
-                subprocess.call(
-                    [
-                        "git",
-                        "clone",
-                        "--recursive",
-                        "{}/{}".format(conf.repo_path, conf.repo),
-                    ]
-                )
+            # if not os.path.isdir(conf.repo):
+            #    subprocess.call(
+            #        [
+            #            "git",
+            #            "clone",
+            #            "--recursive",
+            #            "{}/{}".format(conf.repo_path, conf.repo),
+            #        ]
+            #    )
             os.chdir(conf.repo)
 
-            cmd_list = [
-                ["git", "fetch", "origin"],
-                ["git", "reset", "--hard", "origin/%s" % git_branch],
-            ]
+            # cmd_list = [
+            #     ["git", "fetch", "origin"],
+            #     ["git", "reset", "--hard", "origin/%s" % git_branch],
+            # ]
 
             static_source = os.path.join(path, conf.repo, "staticfiles")
             if not os.path.isdir(static_source):
                 os.mkdir(static_source)
 
-            for cmd in cmd_list:
-                print("[{}/{}]: {}".format(path, conf.repo, " ".join(cmd)))
-                subprocess.call(
-                    cmd, stdout=open(os.devnull, "w"), stderr=open(os.devnull, "w")
-                )
+                # for cmd in cmd_list:
+                #    print("[{}/{}]: {}".format(path, conf.repo, " ".join(cmd)))
+                #    subprocess.call(
+                #        cmd, stdout=open(os.devnull, "w"), stderr=open(os.devnull, "w")
+                #    )
 
             script = conf.script(config_branch)
             if script:
