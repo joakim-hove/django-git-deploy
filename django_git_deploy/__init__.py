@@ -43,6 +43,8 @@ class Config(object):
 
     def __init__(self, config_file="hooks/{}".format(config_file)):
         self.data = yaml.safe_load(open(config_file))
+        self.repo_name, _ = os.path.splitext(os.path.basename(os.getcwd()))
+        self.repo_path = os.getcwd()
 
         for config in self.data.values():
             if "deploy_path" not in config:
@@ -55,9 +57,6 @@ class Config(object):
 
             if os.path.isdir(os.path.join(deploy_path, ".git")):
                 raise OSError("Target path should not be the git repository")
-
-        self.repo_name, _ = os.path.splitext(os.path.basename(os.getcwd()))
-        self.repo_path = os.getcwd()
 
     def config_branch(self, git_branch):
         for config_branch in self.data.keys():
@@ -99,7 +98,7 @@ def update_work_tree(git_branch, conf):
         cmd = [
             "git",
             "--work-tree",
-            f"{deploy_path / conf.repo_name}",
+            f"{deploy_path}",
             "-C",
             f"{conf.repo_path}",
             "checkout",
@@ -109,8 +108,6 @@ def update_work_tree(git_branch, conf):
         print(" ".join(cmd))
         subprocess.run(cmd, check=True)
         with pushd(deploy_path):
-            os.chdir(conf.repo_name)
-
             script = conf.script(config_branch)
             if script:
                 if script.is_file() and os.access(script, os.X_OK):
