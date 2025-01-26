@@ -1,3 +1,4 @@
+from re import sub
 import sys
 import os
 import os.path
@@ -93,18 +94,18 @@ def update_wc(git_branch, conf):
     env.update(conf.env(config_branch))
 
     with env_context(env):
-        subprocess.call(
-            [
-                "git",
-                "checkout",
-                "-f",
-                "--work-tree",
-                path,
-                "-C",
-                conf.repo_path,
-                git_branch,
-            ]
-        )
+        cmd = [
+            "git",
+            "checkout",
+            "-f",
+            "--work-tree",
+            path,
+            "-C",
+            f"{conf.repo_path}/{conf.repo}",
+            git_branch,
+        ]
+        print(cmd)
+        subprocess.call(cmd)
         with pushd(path):
             # if not os.path.isdir(conf.repo):
             #    subprocess.call(
