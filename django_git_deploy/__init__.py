@@ -111,7 +111,8 @@ def update_work_tree(git_branch, conf):
             script = conf.script(config_branch)
             if script:
                 if script.is_file() and os.access(script, os.X_OK):
-                    subprocess.run([str(script)], check=True)
+                    abs_path = deploy_path / script
+                    subprocess.run([str(abs_path)], check=True)
                 else:
                     print("script path: {} does not exist".format(script))
                     raise OSError("Script does not exist")
